@@ -15,7 +15,7 @@ import pint
 ureg = pint.UnitRegistry()
 ureg.setup_matplotlib(True)
 
-class Task():
+class PBI():
     # TODO: Should you include a personal V and a company V? The personal V includes
     # whether you learn from the story. You are looking for the alignment of your interests
     # with the company interests. You could have a table that lists priorities if you
@@ -23,23 +23,45 @@ class Task():
     #
     # I like this approach because it makes it clear what some "research" developers do
     # (they only care about the personal V).
-    def __init__(self, T, V_units, E_units):
-        # A short string summarizing the task
+    def __init__(self, T, V_units, tasks):
+        # A short string summarizing the value of the PBI, such as:
+        # - A user story.
+        # - A functional requirement.
         self.T = T
         
-        # E and V are stored in units of hours; the "smart" constructor takes
-        # measurements in time (or dollars in the future) and converts to the
-        # standard of hours.
+        # V is stored in units of hours; the "smart" constructor takes
+        # measurements in time and converts to the standard of hours.
         #
-        # By providing V and E with only uncertainties we make analysis of tasks
-        # easier (no nested uncertainties classes in pint classes).
-        self.E = E_units.to(ureg.hours).magnitude
         # TODO: Support converting dollars to hours once there are many V
         # measurements in dollars.
+        #
+        # By providing V without units we make analysis of tasks
+        # easier (no nested uncertainties classes in pint classes).
         self.V = V_units.to(ureg.hours).magnitude
         
+        self.tasks = tasks
+        
     def W(self):
-        return self.V / self.E
+        return self.V / self.E()
+
+    def E(self):
+        return sum(task.E for task in self.tasks)
+
+    def S(self):
+        return self.E() < 8
+
+
+class Task():
+    def __init__(self, T, E_units):
+        # A short string summarizing the task.
+        self.T = T
+
+        # E is stored in units of hours; the "smart" constructor takes
+        # measurements in time and converts to the standard of hours.
+        #
+        # By providing E without units we make analysis of tasks
+        # easier (no nested uncertainties classes in pint classes).
+        self.E = E_units.to(ureg.hours).magnitude
 
     # Is the task small enough to start on? Should this include the uncertainty?
     def S(self):
