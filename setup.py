@@ -5,6 +5,8 @@ backlog = []
 import uncertainties
 from uncertainties import ufloat
 
+from datetime import datetime
+
 # Tasks should be defined with:
 # * E in time.
 # * V in either dollars or time. If in dollars, use the "count" unit:
@@ -23,7 +25,7 @@ class PBI():
     #
     # I like this approach because it makes it clear what some "research" developers do
     # (they only care about the personal V).
-    def __init__(self, T, V_units, tasks):
+    def __init__(self, T, V_units, creation_time, tasks):
         # A short string summarizing the value of the PBI, such as:
         # - A user story.
         # - A functional requirement.
@@ -38,6 +40,8 @@ class PBI():
         # By providing V without units we make analysis of tasks
         # easier (no nested uncertainties classes in pint classes).
         self.V = V_units.to(ureg.hours).magnitude
+
+        self.creation_time = creation_time
         
         self.tasks = tasks
         
