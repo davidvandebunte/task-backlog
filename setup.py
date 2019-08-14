@@ -25,18 +25,20 @@ class PBI():
     #
     # I like this approach because it makes it clear what some "research" developers do
     # (they only care about the personal V).
-    def __init__(self, V_units, creation_time, T=None, link=None, tasks=None, E_units=None):
-        if link is not None:
-            self.link = link
-            self.T = link.rpartition('/')[-1]
-            assert(T is None)
-        elif T is not None:
+    def __init__(self, V_units, creation_time, T=None, url=None, tasks=None, E_units=None):
+        if url is not None:
+            self.url = url
+            self.T = url.rpartition('/')[-1].lower()
+        else:
+            self.url = ""
+
+        if T is not None:
             # A short string summarizing the value of the PBI, such as:
             # - A user story.
             # - A functional requirement.
             self.T = T
-        else:
-            raise Exception("Missing constructor parameter")
+
+        assert(self.T is not None)
         
         # V is stored in units of hours; the "smart" constructor takes
         # measurements in time and converts to the standard of hours.
@@ -69,22 +71,25 @@ class PBI():
 
 
 class Task():
-    def __init__(self, E_units, T=None, link=None):
-        if link is not None:
-            self.link = link
-            self.T = link.rpartition('/')[-1].lower()
-            assert(T is None)
-        elif T is not None:
+    def __init__(self, E_units, V_learn=ufloat(0, 0)*ureg.hour, T=None, url=None):
+        if url is not None:
+            self.url = url
+            self.T = url.rpartition('/')[-1].lower()
+        else:
+            self.url = ""
+
+        if T is not None:
             # A short string summarizing the task.
             self.T = T
-        else:
-            raise Exception("Missing constructor parameter")
+
+        assert(self.T is not None)
 
         # E is stored in units of hours; the "smart" constructor takes
         # measurements in time and converts to the standard of hours.
         #
         # By providing E without units we make analysis of tasks
         # easier (no nested uncertainties classes in pint classes).
+        self.V_learn = V_learn.to(ureg.hours).magnitude
         self.E = E_units.to(ureg.hours).magnitude
 
     # Is the task small enough to start on? Should this include the uncertainty?
