@@ -25,11 +25,18 @@ class PBI():
     #
     # I like this approach because it makes it clear what some "research" developers do
     # (they only care about the personal V).
-    def __init__(self, T, V_units, creation_time, tasks):
-        # A short string summarizing the value of the PBI, such as:
-        # - A user story.
-        # - A functional requirement.
-        self.T = T
+    def __init__(self, V_units, creation_time, T=None, link=None, tasks=None, E_units=None):
+        if link is not None:
+            self.link = link
+            self.T = link.rpartition('/')[-1]
+            assert(T is None)
+        elif T is not None:
+            # A short string summarizing the value of the PBI, such as:
+            # - A user story.
+            # - A functional requirement.
+            self.T = T
+        else:
+            raise Exception("Missing constructor parameter")
         
         # V is stored in units of hours; the "smart" constructor takes
         # measurements in time and converts to the standard of hours.
@@ -43,7 +50,13 @@ class PBI():
 
         self.creation_time = creation_time
         
-        self.tasks = tasks
+        if tasks is not None:
+            self.tasks = tasks
+            assert(E_units is None)
+        elif E_units is not None:
+            self.tasks = [Task(T=self.T, E_units=E_units)]
+        else:
+            raise Exception("Missing constructor parameter")
         
     def W(self):
         return self.V / self.E()
@@ -56,9 +69,16 @@ class PBI():
 
 
 class Task():
-    def __init__(self, T, E_units):
-        # A short string summarizing the task.
-        self.T = T
+    def __init__(self, E_units, T=None, link=None):
+        if link is not None:
+            self.link = link
+            self.T = link.rpartition('/')[-1].lower()
+            assert(T is None)
+        elif T is not None:
+            # A short string summarizing the task.
+            self.T = T
+        else:
+            raise Exception("Missing constructor parameter")
 
         # E is stored in units of hours; the "smart" constructor takes
         # measurements in time and converts to the standard of hours.
@@ -70,3 +90,7 @@ class Task():
     # Is the task small enough to start on? Should this include the uncertainty?
     def S(self):
         return self.E.nominal_value < 8
+
+    def Timebox(self):
+        # Default to two standard deviations (95% chance of completion)
+        return self.E.nominal_value + 2*self.E.std_dev
