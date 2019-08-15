@@ -18,13 +18,6 @@ ureg = pint.UnitRegistry()
 ureg.setup_matplotlib(True)
 
 class PBI():
-    # TODO: Should you include a personal V and a company V? The personal V includes
-    # whether you learn from the story. You are looking for the alignment of your interests
-    # with the company interests. You could have a table that lists priorities if you
-    # only include company interests, or if you only include your personal interests.
-    #
-    # I like this approach because it makes it clear what some "research" developers do
-    # (they only care about the personal V).
     def __init__(self, V_units, creation_time, T=None, url=None, tasks=None, E_units=None):
         if url is not None:
             self.url = url
