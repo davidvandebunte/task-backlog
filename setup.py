@@ -21,7 +21,7 @@ class PBI():
     def __init__(self, V_units, creation_time, T=None, url=None, tasks=None, E_units=None):
         if url is not None:
             self.url = url
-            self.T = url.rpartition('/')[-1].lower()
+            self.T = "See link"
         else:
             self.url = ""
 
@@ -59,15 +59,12 @@ class PBI():
     def E(self):
         return sum(task.E for task in self.tasks)
 
-    def S(self):
-        return self.E() < 8
-
 
 class Task():
     def __init__(self, E_units, V_learn=ufloat(0, 0)*ureg.hour, T=None, url=None):
         if url is not None:
             self.url = url
-            self.T = url.rpartition('/')[-1].lower()
+            self.T = "See link"
         else:
             self.url = ""
 
@@ -84,10 +81,6 @@ class Task():
         # easier (no nested uncertainties classes in pint classes).
         self.V_learn = V_learn.to(ureg.hours).magnitude
         self.E = E_units.to(ureg.hours).magnitude
-
-    # Is the task small enough to start on? Should this include the uncertainty?
-    def S(self):
-        return self.E.nominal_value < 8
 
     def Timebox(self):
         # Default to two standard deviations (95% chance of completion)
