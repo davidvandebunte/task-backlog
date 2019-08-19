@@ -5,7 +5,7 @@ backlog = []
 import uncertainties
 from uncertainties import ufloat
 
-from datetime import datetime
+from datetime import date
 
 # Tasks should be defined with:
 # * E in time.
@@ -18,7 +18,9 @@ ureg = pint.UnitRegistry()
 ureg.setup_matplotlib(True)
 
 class PBI():
-    def __init__(self, V_units, creation_time, T=None, url=None, tasks=None, E_units=None):
+    # Only ask for a creation date; entering the hour of creation is too much
+    # detail (actively prevent such detail).
+    def __init__(self, V_units, creation_date, T=None, url=None, tasks=None, E_units=None):
         if url is not None:
             self.url = url
             self.T = "See link"
@@ -43,7 +45,7 @@ class PBI():
         # easier (no nested uncertainties classes in pint classes).
         self.V = V_units.to(ureg.hours).magnitude
 
-        self.creation_time = creation_time
+        self.creation_date = creation_date
         
         if tasks is not None:
             self.tasks = tasks
