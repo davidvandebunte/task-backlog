@@ -1,8 +1,4 @@
-# Your backlog is a list of tasks.
-backlog = []
-
 # The V and E in tasks are encouraged to include uncertainties.
-import uncertainties
 from uncertainties import ufloat
 
 from datetime import date
@@ -15,7 +11,6 @@ from datetime import date
 #   * https://github.com/hgrecco/pint
 import pint
 ureg = pint.UnitRegistry()
-ureg.setup_matplotlib(True)
 
 class PBI():
     # Only ask for a creation date; entering the hour of creation is too much
