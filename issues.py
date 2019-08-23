@@ -46,7 +46,11 @@ class PBI():
             self.tasks = tasks
             assert(E_units is None)
         elif E_units is not None:
-            self.tasks = [Task(T=self.T, E_units=E_units)]
+            self.tasks = [Task(
+                T=self.T,
+                url=self.url,
+                E_units=E_units
+                )]
         else:
             raise Exception("Missing constructor parameter")
         
