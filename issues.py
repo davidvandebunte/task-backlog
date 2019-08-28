@@ -12,23 +12,29 @@ from datetime import date
 import pint
 ureg = pint.UnitRegistry()
 
-class PBI():
-    # Only ask for a creation date; entering the hour of creation is too much
-    # detail (actively prevent such detail).
-    def __init__(self, V_units, creation_date, T=None, url=None, tasks=None, E_units=None):
+
+class Issue():
+    def __init__(self, T, V_lr=0.0, url=None):
+        # A short string summarizing the issue (title)
+        self.T = T
+
+        # Learning ratio: The ratio of the time you'll gain long-term from
+        # learning relative to the time it takes to do the task. For dedicated
+        # learning tasks (e.g. following a tuturial) you would hope this to be
+        # greater than one.
+        self.V_lr = V_lr
+
         if url is not None:
             self.url = url
-            self.T = "See link"
         else:
             self.url = ""
 
-        if T is not None:
-            # A short string summarizing the value of the PBI, such as:
-            # - A user story.
-            # - A functional requirement.
-            self.T = T
 
-        assert(self.T is not None)
+class PBI(Issue):
+    # Only ask for a creation date; entering the hour of creation is too much
+    # detail (actively prevent such detail).
+    def __init__(self, T, V_units, creation_date, V_lr=0.0, url=None, tasks=None, E_units=None):
+        Issue.__init__(self, T=T, V_lr=V_lr, url=url)
         
         # V is stored in units of hours; the "smart" constructor takes
         # measurements in time and converts to the standard of hours.
@@ -61,27 +67,17 @@ class PBI():
         return sum(task.E for task in self.tasks)
 
 
-class Task():
-    def __init__(self, E_units, V_learn=ufloat(0, 0)*ureg.hour, T=None, url=None):
-        if url is not None:
-            self.url = url
-            self.T = "See link"
-        else:
-            self.url = ""
-
-        if T is not None:
-            # A short string summarizing the task.
-            self.T = T
-
-        assert(self.T is not None)
+class Task(Issue):
+    def __init__(self, T, E_units, V_learn=ufloat(0, 0)*ureg.hour, V_lr=0.0, url=None):
+        Issue.__init__(self, T=T, V_lr=V_lr, url=url)
 
         # E is stored in units of hours; the "smart" constructor takes
         # measurements in time and converts to the standard of hours.
         #
         # By providing E without units we make analysis of tasks
         # easier (no nested uncertainties classes in pint classes).
-        self.V_learn = V_learn.to(ureg.hours).magnitude
         self.E = E_units.to(ureg.hours).magnitude
+        self.V_learn = V_learn.to(ureg.hours).magnitude
 
     def Timebox(self):
         # Default to two standard deviations (95% chance of completion)
