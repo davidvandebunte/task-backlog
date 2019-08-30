@@ -33,9 +33,16 @@ class Issue():
 class PBI(Issue):
     # Only ask for a creation date; entering the hour of creation is too much
     # detail (actively prevent such detail).
-    def __init__(self, T, V_units, creation_date, V_lr=0.0, url=None, tasks=None, E_units=None):
+    def __init__(self,
+                 T,
+                 V_units,
+                 creation_date,
+                 V_lr=0.0,
+                 url=None,
+                 tasks=None,
+                 E_units=None):
         Issue.__init__(self, T=T, V_lr=V_lr, url=url)
-        
+
         # V is stored in units of hours; the "smart" constructor takes
         # measurements in time and converts to the standard of hours.
         #
@@ -47,19 +54,15 @@ class PBI(Issue):
         self.V = V_units.to(ureg.hours).magnitude
 
         self.creation_date = creation_date
-        
+
         if tasks is not None:
             self.tasks = tasks
-            assert(E_units is None)
+            assert (E_units is None)
         elif E_units is not None:
-            self.tasks = [Task(
-                T=self.T,
-                url=self.url,
-                E_units=E_units
-                )]
+            self.tasks = [Task(T=self.T, url=self.url, E_units=E_units)]
         else:
             raise Exception("Missing constructor parameter")
-        
+
     def W(self):
         return self.V / self.E()
 
@@ -68,7 +71,12 @@ class PBI(Issue):
 
 
 class Task(Issue):
-    def __init__(self, T, E_units, V_learn=ufloat(0, 0)*ureg.hour, V_lr=0.0, url=None):
+    def __init__(self,
+                 T,
+                 E_units,
+                 V_learn=ufloat(0, 0) * ureg.hour,
+                 V_lr=0.0,
+                 url=None):
         Issue.__init__(self, T=T, V_lr=V_lr, url=url)
 
         # E is stored in units of hours; the "smart" constructor takes
@@ -81,4 +89,4 @@ class Task(Issue):
 
     def Timebox(self):
         # Default to two standard deviations (95% chance of completion)
-        return self.E.nominal_value + 2*self.E.std_dev
+        return self.E.nominal_value + 2 * self.E.std_dev
