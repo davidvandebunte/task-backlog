@@ -196,7 +196,8 @@ class Task(Issue):
         wip_ratio (double): See comments on ValueDimensions constructor. If the
             item is not WIP in JIRA, this parameter is ignored.
         """
-        issue = cls.jira.issue(jid)
+        issue = cls.jira.issue(
+            jid, fields='timeestimate,status,summary,created,description')
         if issue.fields.timeestimate:
             estimate = issue.fields.timeestimate * ureg.seconds
         assert estimate is not None
