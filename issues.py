@@ -99,6 +99,7 @@ class Issue():
                  url=None):
         # A short string summarizing the issue (title)
         self.T = T
+        self.summary = T
 
         self.created = created
         self.description = description
