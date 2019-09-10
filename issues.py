@@ -203,7 +203,7 @@ class Task(Issue):
             estimate = issue.fields.timeestimate * ureg.seconds
         assert estimate is not None
 
-        ignorable_status = {'Complete', 'Cancelled'}
+        ignorable_status = {'Complete', 'Cancelled', 'Released'}
         if issue.fields.status.name in ignorable_status:
             return []
 

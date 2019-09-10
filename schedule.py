@@ -102,8 +102,8 @@ def schedule_day(fetch_ideas):
             continue
 
         if sk == 's':
-            task = prompt_for_integer("Enter task index: ")
             full = perform_analysis(fetch_ideas)
+            task = prompt_for_integer("Enter task index: ")
             if task < 0 or task >= full.size:
                 break
             t = start_timer(timedelta(hours=full.at[task, "Timebox"]),

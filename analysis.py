@@ -68,7 +68,7 @@ def perform_analysis(fetch_ideas):
     # https://stackoverflow.com/a/48481247/622049
     def make_clickable(val):
         # target _blank to open new window
-        return '<a target="_blank" href="{}">{}</a>'.format(val, val)
+        return '<a target="_blank" href="{val}">{val}</a>'.format(val=val)
 
     # Show a table with what you believe the weightiest item is (even if it's too large to do).
     full.sort_values(by='weight', ascending=False, inplace=True)
@@ -88,8 +88,10 @@ def perform_analysis(fetch_ideas):
     styler.bar(
         subset="calendar_distance_hours", color='yellow', vmin=0.0, vmax=40.0)
 
-    def highlight_empty(x):
-        return ['background-color: #d65f5f' if v == "" else '' for v in x]
+    def highlight_empty(url_cell):
+        return [
+            'background-color: #d65f5f' if v == "" else '' for v in url_cell
+        ]
 
     styler.apply(func=highlight_empty, subset="url")
 
