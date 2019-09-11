@@ -12,7 +12,7 @@ def perform_analysis(fetch_ideas):
         task.E,
         'weight':
         (pbi.V * task.E / pbi.E() + task.V_learn + task.V_lr * task.E) /
-        task.E,
+        (task.E * task.wip_ratio),
         'url':
         task.url,
         'age': (date.today() - pbi.creation_date).days,

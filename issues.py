@@ -31,7 +31,7 @@ ureg = pint.UnitRegistry()
 
 
 class ValueDimensions():
-    def __init__(self, learning_ratio, wip_ratio=0.0, other=0.0 * ureg.hours):
+    def __init__(self, learning_ratio, other=0.0 * ureg.hours):
         """Construct from raw data
 
         Parameters:
@@ -39,22 +39,14 @@ class ValueDimensions():
             invested now because of your increased knowledge/skills. Time can
             be regained before or after your current company; usually the time
             after will dominate this number.
-        wip_ratio (double): Ratio of time regained long-term to time invested
-            now because the task is a work in progress. Higher for:
-              - Work you've already started yourself (in personal mental RAM).
-              - Code you will have to read anyways others are writing (in team
-                mental RAM). Now is the time to catch defects early and improve
-                the code.
         other (pint [time]): Other forms of value, converted to dimensions of time
         """
-        self.wip_ratio = wip_ratio
         self.learning_ratio = learning_ratio
         self.other = other
 
     @classmethod
     def from_components(cls,
                         learning_ratio,
-                        wip_ratio=0.0,
                         compensation=0.0 * ureg.hours,
                         delay=0.0 * ureg.hours):
         """Construct from delineated value components
@@ -67,7 +59,6 @@ class ValueDimensions():
 
         Parameters:
         learning_ratio (double): See above
-        wip_ratio (double): See above
         compensation (pint [time]): Dollar value of task, converted to
             dimensions of time.
         delay (pint [time]): Dollar value of cost of delay, converted to
@@ -75,7 +66,7 @@ class ValueDimensions():
         """
         # TODO: Support converting dollars to hours once there are many V
         # measurements in dollars.
-        return ValueDimensions(learning_ratio, wip_ratio, compensation + delay)
+        return ValueDimensions(learning_ratio, compensation + delay)
 
     def total_value(self, task_size):
         """Value with all dimensions considered
@@ -86,7 +77,7 @@ class ValueDimensions():
         Returns:
         double (pint [time]): Total value
         """
-        return (self.learning_ratio + self.wip_ratio) * task_size + self.other
+        return self.learning_ratio * task_size + self.other
 
 
 class Issue():
@@ -158,6 +149,7 @@ class Task(Issue):
                  E_units,
                  V_learn=ufloat(0, 0) * ureg.hour,
                  V_lr=0.0,
+                 wip_ratio=1.0,
                  created=None,
                  description=None,
                  notes=None,
@@ -170,6 +162,17 @@ class Task(Issue):
             description=description,
             notes=notes,
             url=url)
+        """
+        Parameters:
+        wip_ratio (double): Ratio of time to complete this task now relative to
+            a mental "cold start"; higher for:
+              - Work you've already started yourself (in personal mental RAM).
+              - Code you will have to read anyways others are writing (in team
+                mental RAM). Now is the most efficient (for you, only) time to
+                catch defects and improve code quality.
+        """
+
+        self.wip_ratio = wip_ratio
 
         # E is stored in units of hours; the "smart" constructor takes
         # measurements in time and converts to the standard of hours.
@@ -182,20 +185,18 @@ class Task(Issue):
     jira = load_jira()
 
     @classmethod
-    def from_jira(
-            cls,
-            jid,
-            value_components,
-            # TODO: Improve this default?
-            wip_ratio=0.3,
-            notes=None,
-            estimate=None):
+    def from_jira(cls,
+                  jid,
+                  value_components,
+                  wip_ratio=0.7,
+                  notes=None,
+                  estimate=None):
         """Construct a Task from JIRA and optional overrides
 
         Parameters:
         jid (string): JIRA ID
-        wip_ratio (double): See comments on ValueDimensions constructor. If the
-            item is not WIP in JIRA, this parameter is ignored.
+        wip_ratio (double): See comments on the Task constructor. If the item
+            is not WIP in JIRA, this parameter is reset to 1.0.
         """
         issue = cls.jira.issue(
             jid, fields='timeestimate,status,summary,created,description')
@@ -208,14 +209,15 @@ class Task(Issue):
             return []
 
         wip_status = {'Developing', 'Submitted'}
-        if issue.fields.status.name in wip_status:
-            value_components.wip_ratio = wip_ratio
+        if issue.fields.status.name not in wip_status:
+            wip_ratio = 1.0
 
         return [
             Task(
                 T=issue.fields.summary,
                 E_units=estimate,
                 V_learn=value_components.total_value(estimate),
+                wip_ratio=wip_ratio,
                 created=issue.fields.created,
                 description=issue.fields.description,
                 notes=notes,
