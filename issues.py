@@ -41,6 +41,10 @@ class ValueDimensions():
             after will dominate this number.
         other (pint [time]): Other forms of value, converted to dimensions of time
         """
+        # Learning ratio: The ratio of the time you'll gain long-term from
+        # learning relative to the time it takes to do the task. For dedicated
+        # learning tasks (e.g. following a tuturial) you would hope this to be
+        # greater than one.
         self.learning_ratio = learning_ratio
         self.other = other
 
@@ -83,7 +87,7 @@ class ValueDimensions():
 class Issue():
     def __init__(self,
                  T,
-                 V_lr=0.0,
+                 value_dimensions,
                  created=None,
                  description=None,
                  notes=None,
@@ -96,11 +100,7 @@ class Issue():
         self.description = description
         self.notes = notes
 
-        # Learning ratio: The ratio of the time you'll gain long-term from
-        # learning relative to the time it takes to do the task. For dedicated
-        # learning tasks (e.g. following a tuturial) you would hope this to be
-        # greater than one.
-        self.V_lr = V_lr
+        self.value_dimensions = value_dimensions
 
         if url is not None:
             self.url = url
@@ -115,11 +115,11 @@ class PBI(Issue):
                  T,
                  V_units,
                  creation_date,
-                 V_lr=0.0,
+                 value_dimensions,
                  url=None,
                  tasks=None,
                  E_units=None):
-        Issue.__init__(self, T=T, V_lr=V_lr, url=url)
+        Issue.__init__(self, T=T, value_dimensions=value_dimensions, url=url)
 
         # TODO: Move to ValueDimensions
         # By providing V without units we make analysis of tasks
@@ -132,7 +132,13 @@ class PBI(Issue):
             self.tasks = tasks
             assert (E_units is None)
         elif E_units is not None:
-            self.tasks = [Task(T=self.T, url=self.url, E_units=E_units)]
+            self.tasks = [
+                Task(
+                    summary=self.T,
+                    value_dimensions=value_dimensions,
+                    url=self.url,
+                    estimate=E_units)
+            ]
         else:
             raise Exception("Missing constructor parameter")
 
@@ -145,10 +151,9 @@ class PBI(Issue):
 
 class Task(Issue):
     def __init__(self,
-                 T,
-                 E_units,
-                 V_learn=ufloat(0, 0) * ureg.hour,
-                 V_lr=0.0,
+                 summary,
+                 estimate,
+                 value_dimensions,
                  wip_ratio=1.0,
                  created=None,
                  description=None,
@@ -156,8 +161,8 @@ class Task(Issue):
                  url=None):
         Issue.__init__(
             self,
-            T=T,
-            V_lr=V_lr,
+            T=summary,
+            value_dimensions=value_dimensions,
             created=created,
             description=description,
             notes=notes,
@@ -179,8 +184,7 @@ class Task(Issue):
         #
         # By providing E without units we make analysis of tasks
         # easier (no nested uncertainties classes in pint classes).
-        self.E = E_units.to(ureg.hours).magnitude
-        self.V_learn = V_learn.to(ureg.hours).magnitude
+        self.E = estimate.to(ureg.hours).magnitude
 
     jira = load_jira()
 
@@ -214,9 +218,9 @@ class Task(Issue):
 
         return [
             Task(
-                T=issue.fields.summary,
-                E_units=estimate,
-                V_learn=value_components.total_value(estimate),
+                summary=issue.fields.summary,
+                estimate=estimate,
+                value_dimensions=value_components,
                 wip_ratio=wip_ratio,
                 created=issue.fields.created,
                 description=issue.fields.description,

@@ -1,6 +1,7 @@
 import pandas as pd
 from IPython.core.display import display, Markdown
 from datetime import date
+from taskbacklog.issues import ureg
 
 
 def perform_analysis(fetch_ideas):
@@ -11,7 +12,8 @@ def perform_analysis(fetch_ideas):
         'estimate':
         task.E,
         'weight':
-        (pbi.V * task.E / pbi.E() + task.V_learn + task.V_lr * task.E) /
+        (pbi.V * task.E / pbi.E() + task.value_dimensions.total_value(
+            task.E * ureg.hours).to(ureg.hours).magnitude) /
         (task.E * task.wip_ratio),
         'url':
         task.url,
