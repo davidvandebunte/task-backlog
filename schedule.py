@@ -112,50 +112,50 @@ def schedule_day(fetch_ideas):
             
             if row.estimate > 1 and not row.url:
                 display(Markdown(
-    """
-    Before starting work on a task larger than an hour, report your plan:
-    - On a shared backlog
-    - At a daily stand-up
-    """
+"""
+Before starting work on a task larger than an hour, report your plan:
+- On a shared backlog
+- At a daily stand-up
+"""
             ))
 
             if row.estimate > 4:
                 display(Markdown(
-    """
-    Break down tasks larger than 4 hours. See:
-    - [Process: Backlog grooming](https://docs.google.com/document/d/1bmRN4n0kbMN2EOhMKk62VMjpkAYcolWbKj0vPLyJKa8/edit#)
-    - [Decision: Should you split story subtasks further?][1]
-    - [Process: PBI subtask planning](https://docs.google.com/document/d/1g39MM493y1KSkZLYHWtxmnf-68CZjfw_rPADFaErvgk/edit).
+"""
+Break down tasks larger than 4 hours. See:
+- [Process: Backlog grooming](https://docs.google.com/document/d/1bmRN4n0kbMN2EOhMKk62VMjpkAYcolWbKj0vPLyJKa8/edit#)
+- [Decision: Should you split story subtasks further?][1]
+- [Process: PBI subtask planning](https://docs.google.com/document/d/1g39MM493y1KSkZLYHWtxmnf-68CZjfw_rPADFaErvgk/edit).
 
-    [1]: https://docs.google.com/document/d/1hQ99w3ZnrLpwygfZJHFTKfbrYqwo-cXB5tZIBmKtw4o/edit#
-    """
+[1]: https://docs.google.com/document/d/1hQ99w3ZnrLpwygfZJHFTKfbrYqwo-cXB5tZIBmKtw4o/edit#
+"""
             ))
 
             if row.age < 3:
                 display(Markdown(
-    """
-    Avoid recently created stories. See:
-    - [Process: Handling interruptions](https://docs.google.com/document/d/1Y0LbIWeP4wnwm09FsC2YejIMFvrG3wfNtiVQVQaG4ew/edit)
-    - [What if the build breaks?](https://docs.google.com/document/d/1wp7nLk6tkN8FlLELK7-IcbWgNlpmw51MC1DWSW9_yLc/edit)
-    """
+"""
+Avoid recently created stories. See:
+- [Process: Handling interruptions](https://docs.google.com/document/d/1Y0LbIWeP4wnwm09FsC2YejIMFvrG3wfNtiVQVQaG4ew/edit)
+- [What if the build breaks?](https://docs.google.com/document/d/1wp7nLk6tkN8FlLELK7-IcbWgNlpmw51MC1DWSW9_yLc/edit)
+"""
             ))
             if row.age < timedelta(weeks=2).days:
                 display(Markdown(
-    """
-    This story was created in the last two weeks. Is it valuable because it is focal?
-    """
-            ))
+"""
+This story was created in the last two weeks. Is it valuable because it is focal?
+"""
+))
             input("Hit enter to complete.")
             t.cancel()
             continue
-            
+
         tasks = prompt_for_integer("Enter unsorted tasks in {}: ".format(system.name))
         if tasks == 0:
             continue
 
         t = start_timer(timedelta(minutes=2*tasks), "Timeout! Routine: Come back to this system.")
         print("")
-        
+
         # It's inefficient to snooze to your task backlog items that are
         # less than 60m even though there is risk they have focal value
         # you could remove. Your only option is to apply a safety factor
@@ -163,7 +163,7 @@ def schedule_day(fetch_ideas):
         # (as a ratio of true value) does a typical small task get from
         # being focal? Small tasks have little time to get focal?
         focal_boost = 0.1
-        
+
         # It’s addicting to get “something” done even if it's not weighty
         # ("gamification" of email).
         gamification_boost = 0.05
@@ -187,20 +187,20 @@ def schedule_day(fetch_ideas):
         weight_small = weight_top_of_backlog * (1 + focal_boost) * (1 + gamification_boost) * (1 + learn_boost)
 
         display(Markdown("""
-    Perform up to one minute on TVE, then bin it:
+Perform up to one minute on TVE, then bin it:
 
-    | Size range (bin) of E[E]    | Algorithm            |
-    | ---                         | ---                  |
-    | $E[\\textbf{E}] < 1m$       | Small personal task  |
-    | $1m < E[\\textbf{E}] < 4m$  | Medium personal task |
-    | $4m < E[\\textbf{E}] < 60m$ | Large personal task  |
-    | $60m < E[\\textbf{E}]$      | Shareable task       |
+| Size range (bin) of E[E]    | Algorithm            |
+| ---                         | ---                  |
+| $E[\\textbf{E}] < 1m$       | Small personal task  |
+| $1m < E[\\textbf{E}] < 4m$  | Medium personal task |
+| $4m < E[\\textbf{E}] < 60m$ | Large personal task  |
+| $60m < E[\\textbf{E}]$      | Shareable task       |
 
-    ### Small personal tasks
-    Unsubscribe from small tasks with $E[\\textbf{W}]$ lower
-    than $W_{small}$ (currently """ + f"{weight_small}). Resolve as you encounter."
-    ))
-        
+### Small personal tasks
+Unsubscribe from small tasks with $E[\\textbf{W}]$ lower
+than $W_{small}$ (currently """ + f"{weight_small}). Resolve as you encounter."
+        ))
+
         # All the same for medium
         focal_boost = 0.2
         gamification_boost = 0.1
@@ -208,26 +208,26 @@ def schedule_day(fetch_ideas):
         weight_medium = weight_top_of_backlog * (1 + focal_boost) * (1 + gamification_boost) * (1 + learn_boost)
         
         display(Markdown(
-    """
-    ### Large personal task
-    Steps:
-    1. If the item has no cost of delay and is weighty, attempt
-       to group it with other items on your task backlog.
-    1. Annotate with your one-minute TVE analysis (to define an
-       E for a detailed TVE analysis later).
+"""
+### Large personal task
+Steps:
+1. If the item has no cost of delay and is weighty, attempt
+   to group it with other items on your task backlog.
+1. Annotate with your one-minute TVE analysis (to define an
+   E for a detailed TVE analysis later).
 
-    Immediately resolve annotated personal tasks only after skimming all systems. Spend up
-    to 10\% of $E[\\textbf{E}]$ on TVE, then flip a coin to decide whether to do it.
+Immediately resolve annotated personal tasks only after skimming all systems. Spend up
+to 10\% of $E[\\textbf{E}]$ on TVE, then flip a coin to decide whether to do it.
 
-    ### Shareable task
-    Move larger tasks ($E[\\textbf{E}] > 60m$) to a shared backlog, or analyze
-    them on your task backlog and report you are going to do them at daily scrum.
+### Shareable task
+Move larger tasks ($E[\\textbf{E}] > 60m$) to a shared backlog, or analyze
+them on your task backlog and report you are going to do them at daily scrum.
 
-    ### Medium personal task
-    Spend up to 10\% of $E[\\textbf{E}]$ on TVE, or $6s < E[\\textbf{E}] < 24s$
-    (i.e. do a mental analysis only). Resolve as you encounter; enter "y" then the weight below.
-    """
-    ))
+### Medium personal task
+Spend up to 10\% of $E[\\textbf{E}]$ on TVE, or $6s < E[\\textbf{E}] < 24s$
+(i.e. do a mental analysis only). Resolve as you encounter; enter "y" then the weight below.
+"""
+        ))
 
         while True:
             medium = input("Do you need to add 4m for a medium personal task (empty to stop)?")
@@ -236,14 +236,14 @@ def schedule_day(fetch_ideas):
                 break
 
             display(Markdown("""
-    Estimate the weight of the medium task: 
-    $$W = E[\\textbf{V}/\\textbf{E}]$$"""
-    ))
+Estimate the weight of the medium task: 
+$$W = E[\\textbf{V}/\\textbf{E}]$$"""
+            ))
             weight = prompt_for_integer("Estimated weight: ")
             if weight < weight_medium:
                 display(Markdown(
-    "Say no to this task because $E[\\textbf{V}/\\textbf{E}] < W_{medium}$ " + f" ({weight} < {weight_medium}). "
-    ))
+"Say no to this task because $E[\\textbf{V}/\\textbf{E}] < W_{medium}$ " + f" ({weight} < {weight_medium}). "
+            ))
 
             t = start_timer(timedelta(minutes=8), "Timeout! Come back to this task.")
             input("Hit enter to complete.")
