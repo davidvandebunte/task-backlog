@@ -189,9 +189,35 @@ class Task(Issue):
     jira = load_jira()
 
     @classmethod
+    def from_jira_story(cls, jid, value_dimensions, estimate):
+        """Construct a Task from a JIRA story
+
+        Parameters:
+        jid (string): JIRA ID
+        """
+        issue = cls.jira.issue(
+            jid,
+            fields='subtasks,timeestimate,status,summary,created,description')
+        # If the story doesn't have subtasks, import it as a task of its own.
+        if not issue.fields.subtasks:
+            return cls.from_jira(
+                jid, value_dimensions=value_dimensions, estimate=estimate)
+        # Otherwise import all the subtasks, assuming they make the story
+        # complete.
+        tasks = []
+        estimate = estimate / float(len(issue.fields.subtasks))
+        for task in issue.fields.subtasks:
+            tasks.extend(
+                cls.from_jira(
+                    task.key,
+                    value_dimensions=value_dimensions,
+                    estimate=estimate))
+        return tasks
+
+    @classmethod
     def from_jira(cls,
                   jid,
-                  value_components,
+                  value_dimensions,
                   wip_ratio=0.7,
                   notes=None,
                   estimate=None):
@@ -220,7 +246,7 @@ class Task(Issue):
             Task(
                 summary=issue.fields.summary,
                 estimate=estimate,
-                value_dimensions=value_components,
+                value_dimensions=value_dimensions,
                 wip_ratio=wip_ratio,
                 created=issue.fields.created,
                 description=issue.fields.description,
