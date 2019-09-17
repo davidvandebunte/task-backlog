@@ -14,11 +14,12 @@ class System():
 systems = {'c': System(name="Calendar", tips="""
 Can you shrink the “filled” blocks in your schedule? For example, can you:
 * Shorten meetings? Achieve the meeting goal so it can be cancelled.
+  * If it's informational, only get the slides or watch the recording at 2-3x.
 * Get exercise at the same time?
 * "Work" less than 40 hours?
 * Ignore a deadline to do weightier work instead? See [Decision: Should you respect a particular deadline?](https://docs.google.com/document/d/1JKY2lkoiNFfMR-UEcAL3EEOeIVhftIgdke-60MdYk64/edit).
 
-Review:
+Review two days ahead in:
 * [Google Calendar - today](https://calendar.google.com/calendar/r/day)
 * [Calendar - Outlook - today](https://outlook.office.com/calendar/view/day)
 """),
