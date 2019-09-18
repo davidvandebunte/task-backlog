@@ -1,5 +1,6 @@
 from datetime import date
 import os
+import re
 
 # Read as much as possible from a shared location when you're working on a
 # team; put analysis in JIRA before your personal notes.
@@ -39,7 +40,8 @@ class ValueDimensions():
             invested now because of your increased knowledge/skills. Time can
             be regained before or after your current company; usually the time
             after will dominate this number.
-        other (pint [time]): Other forms of value, converted to dimensions of time
+        other (pint [time]): Other forms of value, converted to dimensions of
+        time
         """
         # Learning ratio: The ratio of the time you'll gain long-term from
         # learning relative to the time it takes to do the task. For dedicated
@@ -130,7 +132,7 @@ class PBI(Issue):
 
         if tasks is not None:
             self.tasks = tasks
-            assert (E_units is None)
+            assert E_units is None
         elif E_units is not None:
             self.tasks = [
                 Task(
@@ -192,6 +194,10 @@ class Task(Issue):
     def from_jira_story(cls, jid, value_dimensions, estimate):
         """Construct a Task from a JIRA story
 
+        At HERE, the term "story" rarely means "user story"; teams often uses
+        stories for what should have been tasks. Work on fixing the cultural
+        issue, but in the short term you can use this import method.
+
         Parameters:
         jid (string): JIRA ID
         """
@@ -215,12 +221,7 @@ class Task(Issue):
         return tasks
 
     @classmethod
-    def from_jira(cls,
-                  jid,
-                  value_dimensions,
-                  wip_ratio=0.7,
-                  notes=None,
-                  estimate=None):
+    def from_jira(cls, jid, value_dimensions, notes=None, estimate=None):
         """Construct a Task from JIRA and optional overrides
 
         Parameters:
@@ -228,8 +229,18 @@ class Task(Issue):
         wip_ratio (double): See comments on the Task constructor. If the item
             is not WIP in JIRA, this parameter is reset to 1.0.
         """
-        issue = cls.jira.issue(
-            jid, fields='timeestimate,status,summary,created,description')
+
+        fields = [
+            'assignee',
+            'comment',
+            'created',
+            'description',
+            'reporter',
+            'status',
+            'summary',
+            'timeestimate',
+        ]
+        issue = cls.jira.issue(jid, fields=','.join(fields))
         if issue.fields.timeestimate:
             estimate = issue.fields.timeestimate * ureg.seconds
         assert estimate is not None
@@ -238,11 +249,42 @@ class Task(Issue):
         if issue.fields.status.name in ignorable_status:
             return []
 
-        wip_status = {'Developing', 'Submitted'}
-        if issue.fields.status.name not in wip_status:
-            wip_ratio = 1.0
+        self_assigned = False
+        if issue.fields.assignee is not None:
+            if issue.fields.assignee.name == 'vandebun':
+                self_assigned = True
 
-        return [
+        wip_status = {'Developing', 'Submitted'}
+        wip_ratio = 1.0
+        if issue.fields.status.name in wip_status:
+            wip_ratio = 0.7
+            # Take care of the WIP you are contributing to the team first.
+            if self_assigned:
+                wip_ratio = 0.5
+
+        task_list = []
+
+        if not self_assigned:
+            merge_pattern = re.compile(r"\[a merge request.*\|(.*)\]")
+            merge_requests = [
+                merge_pattern.search(comment.body).group(1)
+                for comment in issue.fields.comment.comments
+                if merge_pattern.search(comment.body)
+            ]
+            for merge_request in merge_requests:
+                task_list.extend([
+                    Task(
+                        summary=issue.fields.summary,
+                        estimate=ufloat(1.0, 0.25) * ureg.hours,
+                        value_dimensions=value_dimensions,
+                        wip_ratio=wip_ratio,
+                        created=issue.fields.created,
+                        description=issue.fields.description,
+                        notes=notes,
+                        url=merge_request)
+                ])
+
+        task_list.extend([
             Task(
                 summary=issue.fields.summary,
                 estimate=estimate,
@@ -252,7 +294,9 @@ class Task(Issue):
                 description=issue.fields.description,
                 notes=notes,
                 url=issue.permalink())
-        ]
+        ])
+
+        return task_list
 
     def Timebox(self):
         # Default to two standard deviations (95% chance of completion)
