@@ -19,9 +19,9 @@ Can you shrink the “filled” blocks in your schedule? For example, can you:
 * "Work" less than 40 hours?
 * Ignore a deadline to do weightier work instead? See [Decision: Should you respect a particular deadline?](https://docs.google.com/document/d/1JKY2lkoiNFfMR-UEcAL3EEOeIVhftIgdke-60MdYk64/edit).
 
-Review two days ahead in:
-* [Google Calendar - today](https://calendar.google.com/calendar/r/day)
-* [Calendar - Outlook - today](https://outlook.office.com/calendar/view/day)
+Review a few days ahead in:
+* [Google Calendar](https://calendar.google.com/calendar/r/custom/3/d)
+* [Outlook Calendar](https://outlook.office.com/calendar/view/workweek)
 """),
            'g': System(name="Gmail", tips="""
 - [Gmail](https://mail.google.com/mail/u/0/#inbox) tips:
