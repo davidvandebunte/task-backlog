@@ -13,9 +13,8 @@ def load_jira():
     config.read(os.path.expanduser('~/.jira.conf'))
     jira_cred = config['credentials']
     # https://jira.readthedocs.io/en/master/examples.html#cookie-based-authentication
-    return JIRA(
-        'https://ngmp.in.here.com',
-        auth=(jira_cred['username'], jira_cred['password']))
+    return JIRA('https://ngmp.in.here.com',
+                auth=(jira_cred['username'], jira_cred['password']))
 
 
 # The V and E in tasks are encouraged to include uncertainties.
@@ -135,11 +134,10 @@ class PBI(Issue):
             assert E_units is None
         elif E_units is not None:
             self.tasks = [
-                Task(
-                    summary=self.T,
-                    value_dimensions=value_dimensions,
-                    url=self.url,
-                    estimate=E_units)
+                Task(summary=self.T,
+                     value_dimensions=value_dimensions,
+                     url=self.url,
+                     estimate=E_units)
             ]
         else:
             raise Exception("Missing constructor parameter")
@@ -161,14 +159,13 @@ class Task(Issue):
                  description=None,
                  notes=None,
                  url=None):
-        Issue.__init__(
-            self,
-            T=summary,
-            value_dimensions=value_dimensions,
-            created=created,
-            description=description,
-            notes=notes,
-            url=url)
+        Issue.__init__(self,
+                       T=summary,
+                       value_dimensions=value_dimensions,
+                       created=created,
+                       description=description,
+                       notes=notes,
+                       url=url)
         """
         Parameters:
         wip_ratio (double): Ratio of time to complete this task now relative to
@@ -188,7 +185,7 @@ class Task(Issue):
         # easier (no nested uncertainties classes in pint classes).
         self.E = estimate.to(ureg.hours).magnitude
 
-    jira = load_jira()
+    jira = None
 
     @classmethod
     def from_jira_story(cls, jid, value_dimensions, estimate):
@@ -201,23 +198,25 @@ class Task(Issue):
         Parameters:
         jid (string): JIRA ID
         """
+        if not cls.jira:
+            cls.jira = load_jira()
         issue = cls.jira.issue(
             jid,
             fields='subtasks,timeestimate,status,summary,created,description')
         # If the story doesn't have subtasks, import it as a task of its own.
         if not issue.fields.subtasks:
-            return cls.from_jira(
-                jid, value_dimensions=value_dimensions, estimate=estimate)
+            return cls.from_jira(jid,
+                                 value_dimensions=value_dimensions,
+                                 estimate=estimate)
         # Otherwise import all the subtasks, assuming they make the story
         # complete.
         tasks = []
         estimate = estimate / float(len(issue.fields.subtasks))
         for task in issue.fields.subtasks:
             tasks.extend(
-                cls.from_jira(
-                    task.key,
-                    value_dimensions=value_dimensions,
-                    estimate=estimate))
+                cls.from_jira(task.key,
+                              value_dimensions=value_dimensions,
+                              estimate=estimate))
         return tasks
 
     @classmethod
@@ -240,6 +239,8 @@ class Task(Issue):
             'summary',
             'timeestimate',
         ]
+        if not cls.jira:
+            cls.jira = load_jira()
         issue = cls.jira.issue(jid, fields=','.join(fields))
         if issue.fields.timeestimate:
             estimate = issue.fields.timeestimate * ureg.seconds
@@ -273,27 +274,25 @@ class Task(Issue):
             ]
             for merge_request in merge_requests:
                 task_list.extend([
-                    Task(
-                        summary=issue.fields.summary,
-                        estimate=ufloat(1.0, 0.25) * ureg.hours,
-                        value_dimensions=value_dimensions,
-                        wip_ratio=wip_ratio,
-                        created=issue.fields.created,
-                        description=issue.fields.description,
-                        notes=notes,
-                        url=merge_request)
+                    Task(summary=issue.fields.summary,
+                         estimate=ufloat(1.0, 0.25) * ureg.hours,
+                         value_dimensions=value_dimensions,
+                         wip_ratio=wip_ratio,
+                         created=issue.fields.created,
+                         description=issue.fields.description,
+                         notes=notes,
+                         url=merge_request)
                 ])
 
         task_list.extend([
-            Task(
-                summary=issue.fields.summary,
-                estimate=estimate,
-                value_dimensions=value_dimensions,
-                wip_ratio=wip_ratio,
-                created=issue.fields.created,
-                description=issue.fields.description,
-                notes=notes,
-                url=issue.permalink())
+            Task(summary=issue.fields.summary,
+                 estimate=estimate,
+                 value_dimensions=value_dimensions,
+                 wip_ratio=wip_ratio,
+                 created=issue.fields.created,
+                 description=issue.fields.description,
+                 notes=notes,
+                 url=issue.permalink())
         ])
 
         return task_list
