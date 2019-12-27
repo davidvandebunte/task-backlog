@@ -7,6 +7,9 @@ import re
 from jira import JIRA
 
 
+# You sometimes need to log in from your browser as well, or you get an
+# exception that mentions CAPTCHA_CHALLENGE:
+# https://community.atlassian.com/t5/Jira-questions/JIRA-Rest-Sevice-returns-403-Forbidden/qaq-p/506392
 def load_jira():
     import configparser
     config = configparser.ConfigParser()
