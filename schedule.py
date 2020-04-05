@@ -12,12 +12,12 @@ class System():
         self.tips = tips
 
 systems = {'c': System(name="Calendar", tips="""
-Can you shrink the “filled” blocks in your schedule? For example, can you:
-* Shorten meetings? Achieve the meeting goal so it can be cancelled.
-  * If it's informational, only get the slides or watch the recording at 2-3x.
-* Get exercise at the same time?
-* "Work" less than 40 hours?
-* Ignore a deadline to do weightier work instead? See [Decision: Should you respect a particular deadline?](https://docs.google.com/document/d/1JKY2lkoiNFfMR-UEcAL3EEOeIVhftIgdke-60MdYk64/edit).
+Tips to reduce the “filled” blocks in your schedule:
+* Shorten meetings; achieve the meeting goal so it can be cancelled.
+  * If it's informational only get the slides or watch the recording at 2-3x.
+* Get exercise at the same time.
+* "Work" less than 40 hours.
+* Ignore a deadline to do weightier work instead. See [Decision: Should you respect a particular deadline?](https://docs.google.com/document/d/1JKY2lkoiNFfMR-UEcAL3EEOeIVhftIgdke-60MdYk64/edit).
 
 Review a few days ahead in:
 * [Google Calendar](https://calendar.google.com/calendar/r/custom/3/d)
@@ -25,30 +25,34 @@ Review a few days ahead in:
 """),
            'g': System(name="Gmail", tips="""
 - [Gmail](https://mail.google.com/mail/u/0/#inbox) tips:
-  - Use j/k
   - Find email count in the top right (to the left of the gear).
 """),
-           'o': System(name="Outlook", tips="""
+           'o': System(name="Outlook", tips=
+"""
 - [Outlook](https://outlook.office.com/mail/inbox) tips:
-  - Use j/k!
   - Snooze on your phone
   - Find email count by selecting all conversations then deselecting one.
 """),
-           'k': System(name="Keep", tips="""
-- [Keep](https://keep.google.com/#home) tips:
-  - Use j/k
+           'n': System(name="Notes", tips=
+"""
+- Evaluate individual unorganized notes with [Refactor Notes][rn]
+
+[rn]: http://localhost:1313/shared-notes/post/refactor-notes/
 """),
            'u': System(name="Unfinished", tips="""
-If you already started some task, have a bias towards finishing it before you move on (lower E[**E**] for tasks in working memory).
+If you started a task have a bias towards finishing it before you move on,
+assuming a lower E[**E**] for tasks in working memory.
 
-If you must move on and you also believe the task will come up again, move unorganized working memory into a git commit message (long-term shared storage). For example:
-* Chrome tabs
-* tmux tabs
-* Other applications
+For example:
+- Uncommited changes
+- Chrome tabs
+- tmux tabs
+- Open applications
 
-Consider restarting your machine after a cleanup.
+Consider restarting your machine after a full cleanup.
 """),
-           's': System(name="Schedule", tips="""
+           's': System(name="Schedule", tips=
+"""
 Schedule the item to your day. See:
   * [Decision: Should you schedule your day down to the hour?](https://docs.google.com/document/d/1QuEe13p89Ffcq7Ao_zVcYyrHaq9rMvv8oOCKzmN9BnU/edit)
   * See [Process: Schedule day (home)](https://docs.google.com/document/d/1iPrL-jZtRQC2e3C70vFTNahcJa_H9IBMWOByTciPkHk/edit) (i.e. use a timer).
